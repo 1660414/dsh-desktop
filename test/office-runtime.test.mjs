@@ -63,16 +63,17 @@ describe('Office template preview limits', () => {
 })
 
 describe('Office runtime assembly', () => {
-  it('runs the packaging probe against the current Office skills and physical resources', async () => {
+  it('runs the full packaging gate against the current Office skills and physical resources', async () => {
     const resources = await temporary()
     await symlink(join(root, '.build/office-runtime'), join(resources, 'office-runtime'), process.platform === 'win32' ? 'junction' : 'dir')
+    await symlink(root, join(resources, 'app.asar'), process.platform === 'win32' ? 'junction' : 'dir')
     await copyFile(join(root, 'build/office-cli.mjs'), join(resources, 'office-cli.mjs'))
-    const { stdout } = await exec(electronExecutable(root), [join(root, 'scripts/office-runtime/probe.cjs'), root, resources], {
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, timeout: 30_000
+    await copyFile(join(root, 'build/office-engine-resolution.mjs'), join(resources, 'office-engine-resolution.mjs'))
+    const { stdout } = await exec(process.execPath, [join(root, 'scripts/verify-office-runtime.cjs'), resources, electronExecutable(root)], {
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, timeout: 180_000
     })
-    expect(stdout).toContain('Packaged native Word template editor, embedded-font retention and layout validation passed')
-    expect(stdout).toContain('Packaged Office plugin activated')
-  }, 40_000)
+    expect(stdout).toContain('Packaged Office authoring, structure checks and DOCX/PPTX/XLSX PDF conversion passed')
+  }, 190_000)
 
   it('selects all supported native targets and rejects cross-platform substitutions', () => {
     expect(officeTarget('win32', 'x64')).toBe('win-x64')
