@@ -4,7 +4,6 @@ import { createWriteStream, existsSync, mkdirSync, type WriteStream } from 'node
 import { mkdir, readFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { dirname, join, posix, win32 } from 'node:path'
-import type { Writable } from 'node:stream'
 import { StringDecoder } from 'node:string_decoder'
 import type { RuntimePhase, RuntimeSnapshot } from '../../shared/contracts'
 import { SAFE_MODE_PROFILE } from '../state/safe-mode-profile'
@@ -47,7 +46,6 @@ export interface HarnessRuntimeOptions {
 }
 
 export interface HarnessChildProcess extends EventEmitter {
-  readonly stdin?: Writable | null
   readonly stdout: NodeJS.ReadableStream
   readonly stderr: NodeJS.ReadableStream
   readonly exitCode: number | null
@@ -378,7 +376,6 @@ export function buildHarnessSpawnOptions(
       ...(platform === 'win32' && packagedPnpm.hideConsoleBootstrapPath
         ? { DSH_DESKTOP_HIDE_CONSOLE_BOOTSTRAP: packagedPnpm.hideConsoleBootstrapPath }
         : {}),
-      ...(platform === 'win32' && { DSH_DESKTOP_IPC_SHUTDOWN: '1' }),
       NODE_COMPILE_CACHE: environment.NODE_COMPILE_CACHE ?? pathApi.join(dshHome, 'cache', 'compile-cache'),
       [pathKey]: resolveEnvironmentPath(environment, platform)
     },
@@ -717,19 +714,10 @@ ${cause}`
     const exitPromise = new Promise<boolean>((resolve) =>
       child.once('exit', () => resolve(true))
     )
-    if (process.platform === 'win32' && child.stdin && !child.stdin.destroyed) {
-      try {
-        child.stdin.write('__DSH_SHUTDOWN__\n')
-        child.stdin.end()
-      } catch {
-        child.kill('SIGTERM')
-      }
-    } else {
-      child.kill('SIGTERM')
-    }
+    child.kill('SIGTERM')
     const exited = await Promise.race([
       exitPromise,
-      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 6_000))
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 4_000))
     ])
     if (!exited && child.exitCode === null) child.kill('SIGKILL')
   }
