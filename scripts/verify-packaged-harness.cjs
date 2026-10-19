@@ -66,9 +66,9 @@ async function verifyTerminal(appRoot) {
 }
 
 async function verifyHarness(appRoot, resources, executable) {
-  const home = await fsp.mkdtemp(path.join(os.tmpdir(), 'dsh-packaged-harness-'))
+  const home = await fsp.realpath(await fsp.mkdtemp(path.join(os.tmpdir(), 'dsh-packaged-harness-')))
   const launchRoot = path.join(home, 'launch-root')
-  await fsp.mkdir(launchRoot)
+  await fsp.mkdir(launchRoot, { recursive: true })
   const profile = path.join(home, 'harness', 'profiles', 'desktop-safe-mode')
   await fsp.mkdir(profile, { recursive: true })
   await fsp.writeFile(path.join(profile, 'package.json'), JSON.stringify({ name: 'packaged-recovery-probe', private: true,
@@ -124,12 +124,14 @@ async function verifyHarness(appRoot, resources, executable) {
   } catch (error) {
     throw new Error(`${error.message}\n${output.replace(/token=[^\s]+/gu, 'token=[redacted]')}`, { cause: error })
   } finally {
-    if (child.exitCode === null) child.kill('SIGTERM')
+    if (child.exitCode === null) {
+      try { child.kill(process.platform === 'win32' ? 'SIGKILL' : 'SIGTERM') } catch {}
+    }
     let timer
-    await Promise.race([closed, new Promise(resolve => { timer = setTimeout(() => { child.kill('SIGKILL'); resolve() }, 5_000) })])
+    await Promise.race([closed, new Promise(resolve => { timer = setTimeout(() => { try { child.kill('SIGKILL') } catch {}; resolve() }, 5_000) })])
     clearTimeout(timer)
     await closed
-    await fsp.rm(home, { recursive: true, force: true })
+    await fsp.rm(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
   }
 }
 
@@ -147,11 +149,18 @@ async function verifyPackagedHarness(context) {
   const executable = context.electronPlatformName === 'darwin'
     ? path.join(contents, 'Frameworks', `${product} Helper.app`, 'Contents', 'MacOS', `${product} Helper`)
     : path.join(context.appOutDir, `${product}.exe`)
-  const { stdout } = await promisify(execFile)(executable, [__filename, '--verify-runtime', path.join(resources, 'app.asar'), resources, executable], {
-    cwd: context.appOutDir, env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
-    timeout: 120_000, maxBuffer: 2 * 1024 * 1024, windowsHide: true
-  })
-  process.stdout.write(stdout)
+  try {
+    const { stdout, stderr } = await promisify(execFile)(executable, [__filename, '--verify-runtime', path.join(resources, 'app.asar'), resources, executable], {
+      cwd: context.appOutDir, env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+      timeout: 120_000, maxBuffer: 2 * 1024 * 1024, windowsHide: true
+    })
+    process.stdout.write(stdout)
+    if (stderr) process.stderr.write(stderr)
+  } catch (error) {
+    if (error.stdout) process.stdout.write(error.stdout)
+    if (error.stderr) process.stderr.write(error.stderr)
+    throw error
+  }
 }
 module.exports = { verifyDependencyClosure, verifyTerminal, verifyHarness, verifyPackagedHarness }
 if (require.main === module && process.argv[2] === '--verify-runtime') {
