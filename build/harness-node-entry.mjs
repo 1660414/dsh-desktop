@@ -85,6 +85,33 @@ if (process.platform === 'win32') {
   process.stdout.write('[harness-node] windowsHide enforcement enabled for child processes\n')
 }
 
+// Graceful termination for Windows: Node on Windows kills child processes abruptly
+// via TerminateProcess on child.kill('SIGTERM'), bypassing signal listeners and
+// cleanup hooks (leaving dirty persistence buffers, torn JSONL handles, etc.).
+// By listening for shutdown IPC or stdin closure, Windows child processes can emit a synthetic
+// SIGTERM to trigger graceful Cordis/Harness shutdown and handle flushing before exit.
+if (process.platform === 'win32' && process.env.DSH_DESKTOP_IPC_SHUTDOWN === '1' && process.stdin) {
+  const triggerShutdown = () => {
+    const listeners = process.listeners('SIGTERM')
+    if (listeners.length > 0) {
+      process.emit('SIGTERM')
+    } else {
+      process.exit(0)
+    }
+  }
+  process.stdin.setEncoding('utf8')
+  process.stdin.on('data', (chunk) => {
+    if (typeof chunk === 'string' && chunk.includes('__DSH_SHUTDOWN__')) {
+      triggerShutdown()
+    }
+  })
+  process.stdin.on('end', () => {
+    triggerShutdown()
+  })
+  process.stdin.on('error', () => {})
+  process.stdin.resume()
+}
+
 if (!dshEntryPath) {
   report('startup error', 'missing DSH entry path')
   process.exitCode = 1

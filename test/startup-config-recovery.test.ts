@@ -74,8 +74,10 @@ describe('startup configuration recovery', () => {
     expect(JSON.stringify(problem)).not.toContain('synthetic-private-invalid')
     const shown: string[][] = []
     const show = vi.fn(async (options: { buttons?: string[] }) => { shown.push(options.buttons ?? []); return { response: 2 } })
-    await recoverStartupConfiguration({ dshHome: home, chinese: false, environment: {}, stop: vi.fn(),
-      show, selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn() })
+    await recoverStartupConfiguration({
+      dshHome: home, chinese: false, environment: {}, stop: vi.fn(),
+      show, selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn()
+    })
     expect(shown[0]).toEqual(['Reveal Original File', 'Check Again', 'Back'])
   })
 
@@ -113,10 +115,12 @@ describe('startup configuration recovery', () => {
   it('runs native repair while Harness is stopped and returns a retry without opening a renderer', async () => {
     const text = '- id: llm-deepseek\n  config:\n    baseURL: invalid-endpoint\n'
     await file('profiles/web/cordis.patch.yml', text)
-    const stop = vi.fn(async () => {})
-    const result = await recoverStartupConfiguration({ dshHome: home, chinese: true, environment: {}, stop,
+    const stop = vi.fn(async () => { })
+    const result = await recoverStartupConfiguration({
+      dshHome: home, chinese: true, environment: {}, stop,
       show: vi.fn(async () => ({ response: 0 })),
-      selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn() })
+      selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn()
+    })
     expect(result).toBe('retry')
     expect(stop).toHaveBeenCalledOnce()
     expect((await readdir(join(home, 'profiles', 'web'))).some(name => name.endsWith('.bak'))).toBe(true)
@@ -129,9 +133,11 @@ describe('startup configuration recovery', () => {
     const pendingLaunch = new Promise<void>(resolve => { finishLaunch = resolve })
     const show = vi.fn(async () => ({ response: 3 }))
     let cancelled = false
-    const recovery = recoverStartupConfiguration({ dshHome: home, environment: {}, chinese: false,
+    const recovery = recoverStartupConfiguration({
+      dshHome: home, environment: {}, chinese: false,
       beforeInspect: () => pendingLaunch, cancelled: () => cancelled,
-      stop: vi.fn(), show, selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn() })
+      stop: vi.fn(), show, selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn()
+    })
     await Promise.resolve()
     expect(show).not.toHaveBeenCalled()
     await file('profiles/web/cordis.patch.yml', '- id: kept\n')
@@ -140,7 +146,8 @@ describe('startup configuration recovery', () => {
     expect(show).not.toHaveBeenCalled()
     cancelled = true
     await file('profiles/web/cordis.patch.yml', text)
-    expect(await recoverStartupConfiguration({ dshHome: home, environment: {}, chinese: false,
+    expect(await recoverStartupConfiguration({
+      dshHome: home, environment: {}, chinese: false,
       cancelled: () => cancelled, stop: vi.fn(), show, selectFile: vi.fn(), reveal: vi.fn(), note: vi.fn()
     })).toBe('continue')
     expect(show).not.toHaveBeenCalled()
