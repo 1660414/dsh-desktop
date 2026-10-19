@@ -294,6 +294,7 @@
     "saxes": "6.0.0"
   },
   "devDependencies": {
+    "@electron/notarize": "2.5.0",
     "@types/js-yaml": "4.0.9",
     "@types/node": "24.10.1",
     "@types/qrcode": "^1.5.6",
@@ -480,6 +481,7 @@
     "detectUpdateChannel": false,
     "artifactName": "dsh-desktop-${os}-${arch}.${ext}",
     "mac": {
+      "notarize": false,
       "category": "public.app-category.developer-tools",
       "icon": "build/icon.icns",
       "hardenedRuntime": true,
@@ -525,6 +527,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     },
-    "afterPack": "scripts/after-pack.cjs"
+    "afterPack": "scripts/after-pack.cjs",
+    "afterSign": "scripts/notarize-macos.mjs"
   }
 }
