@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { expect, it } from 'vitest'
@@ -12,14 +12,14 @@ import { ensureSafeModeProfile, SAFE_MODE_PROFILE } from '../src/main/state/safe
 import { resolveTestNodeExecutable } from './node-executable'
 
 it('recovers saved configuration and an old preset before booting a real Harness and creating a session', async () => {
-  const home = await mkdtemp(join(tmpdir(), 'dsh-config-runtime-'))
-  const launchRoot = join(home, 'launch-root')
+  const home = await realpath(await mkdtemp(join(tmpdir(), 'dsh-config-runtime-')))
+  await mkdir(join(home, 'launch-root'), { recursive: true })
+  const launchRoot = await realpath(join(home, 'launch-root'))
   const profile = join(home, 'profiles', 'web')
   await mkdir(profile, { recursive: true })
   await writeFile(join(profile, 'package.json'), JSON.stringify({ name: 'recovery-fixture', private: true,
     dependencies: {}, dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'] } } }))
   await symlink(resolve('node_modules'), join(home, 'profiles', 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir')
-  await mkdir(launchRoot)
   const workspace = { unit: { name: 'workspace', version: 2 }, global: {
     initialized: true, workspaceIds: ['kept'], archivedSessionIds: [], pinnedSessionIds: []
   }, tables: { workspaces: { kept: { path: launchRoot, title: 'Kept workspace', sessionIds: [],
