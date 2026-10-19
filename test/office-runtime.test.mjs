@@ -1,7 +1,7 @@
 import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { createHash } from 'node:crypto'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -63,6 +63,17 @@ describe('Office template preview limits', () => {
 })
 
 describe('Office runtime assembly', () => {
+  it('runs the packaging probe against the current Office skills and physical resources', async () => {
+    const resources = await temporary()
+    await symlink(join(root, '.build/office-runtime'), join(resources, 'office-runtime'), process.platform === 'win32' ? 'junction' : 'dir')
+    await copyFile(join(root, 'build/office-cli.mjs'), join(resources, 'office-cli.mjs'))
+    const { stdout } = await exec(electronExecutable(root), [join(root, 'scripts/office-runtime/probe.cjs'), root, resources], {
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }, timeout: 30_000
+    })
+    expect(stdout).toContain('Packaged native Word template editor, embedded-font retention and layout validation passed')
+    expect(stdout).toContain('Packaged Office plugin activated')
+  }, 40_000)
+
   it('selects all supported native targets and rejects cross-platform substitutions', () => {
     expect(officeTarget('win32', 'x64')).toBe('win-x64')
     expect(officeTarget('darwin', 'arm64')).toBe('mac-arm64')
