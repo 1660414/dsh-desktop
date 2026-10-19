@@ -56,11 +56,3 @@ diff --git a/node_modules/@deepseek-ai/dsh-api-remotes/lib/client.js b/node_modu
  					service: "sessionController",
  					description: "Create one ordinary Session for a new conversation, reusing the named blank Session while it is reusable.",
  					invocation: { kind: "direct" },
-@@ -23687,5 +23724,5 @@
- 		return module.exports;
- 	}
- });
- 
--//# sourceMappingURL=client.js.map
-\ No newline at end of file
-+//# sourceMappingURL=client.js.map

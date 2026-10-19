@@ -261,14 +261,6 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/client.js 
  				yield registerConversationRoot();
  				yield registerConversationContent();
  				yield registerConversationSession();
-@@ -20061,5 +20094,5 @@
- 		return module.exports;
- 	}
- });
- 
--//# sourceMappingURL=client.js.map
-\ No newline at end of file
-+//# sourceMappingURL=client.js.map
 diff --git a/node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/types/client/contract/slots.d.ts b/node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/types/client/contract/slots.d.ts
 --- a/node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/types/client/contract/slots.d.ts
 +++ b/node_modules/@deepseek-ai/dsh-client-ui-conversation/lib/types/client/contract/slots.d.ts
