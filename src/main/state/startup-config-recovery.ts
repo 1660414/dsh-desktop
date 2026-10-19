@@ -69,15 +69,14 @@ function analyzeYaml(path: string, text: string, action?: StartupConfigProblem['
     const node = config.get('baseURL', true)
     if (isScalar(node) && node.tag !== undefined && node.tag !== 'tag:yaml.org,2002:str') return
     if (!validModelEndpoint(value, deepseek)) {
-      // DeepSeek core adapter fails Harness startup when given an invalid URL.
-      // Third-party pi-ai models do not crash Harness; their routes simply fail.
-      // Marking pi-ai non-blocking ensures the desktop app and its Settings UI stay usable.
+      // Model endpoint issues should NOT block Harness startup.
+      // Keeping it non-blocking ensures the desktop app boots and settings remain editable in UI.
       problem(
         'model-url',
         source,
         'baseURL must be an HTTP(S) endpoint without embedded credentials',
         deepseek ? 'reset-endpoint' : undefined,
-        deepseek
+        false
       )
       if (action === 'reset-endpoint') { config.delete('baseURL'); changed = true }
     }
