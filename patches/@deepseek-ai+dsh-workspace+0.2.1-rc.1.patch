@@ -1,8 +1,8 @@
 diff --git a/node_modules/@deepseek-ai/dsh-workspace/lib/index.js b/node_modules/@deepseek-ai/dsh-workspace/lib/index.js
-index 9e3936a..77ed234 100644
 --- a/node_modules/@deepseek-ai/dsh-workspace/lib/index.js
 +++ b/node_modules/@deepseek-ai/dsh-workspace/lib/index.js
-@@ -538,6 +538,26 @@ var WorkspaceRegistry = class extends Service {
+@@ -539,8 +539,28 @@
+ 			});
  			if (options.stopActivity === true) await this.stopSessionActivity(sessionId);
  		});
  	}
@@ -29,11 +29,12 @@ index 9e3936a..77ed234 100644
  	/**
  	* Unarchive one session durably by dropping it from the registry-global
  	* archive set; the accounting slot was never touched, so the session
+ 	* returns to its recorded position. Unarchiving runs no session-existence
 diff --git a/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.d.ts b/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.d.ts
-index daa6916..9687fcb 100644
 --- a/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.d.ts
 +++ b/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.d.ts
-@@ -211,6 +211,8 @@ export declare class WorkspaceRegistry extends Service {
+@@ -211,8 +211,10 @@
+      * @param options - Whether running work is stopped instead of refusing.
       * @returns resolution after durability and, with `stopActivity`, after every stop request was issued.
       */
      archiveSession(sessionId: SessionId, options?: ArchiveSessionOptions): Promise<void>;
@@ -42,11 +43,12 @@ index daa6916..9687fcb 100644
      /**
       * Unarchive one session durably by dropping it from the registry-global
       * archive set; the accounting slot was never touched, so the session
+      * returns to its recorded position. Unarchiving runs no session-existence
 diff --git a/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.js b/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.js
-index fa1c9a7..9be12f8 100644
 --- a/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.js
 +++ b/node_modules/@deepseek-ai/dsh-workspace/lib/types/index.js
-@@ -301,6 +301,31 @@ export class WorkspaceRegistry extends Service {
+@@ -302,8 +302,33 @@
+             if (options.stopActivity === true)
                  await this.stopSessionActivity(sessionId);
          });
      }
@@ -78,3 +80,4 @@ index fa1c9a7..9be12f8 100644
      /**
       * Unarchive one session durably by dropping it from the registry-global
       * archive set; the accounting slot was never touched, so the session
+      * returns to its recorded position. Unarchiving runs no session-existence

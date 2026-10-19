@@ -1,8 +1,8 @@
 diff --git a/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/index.js b/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/index.js
-index 2d94c1a..633f98f 100644
 --- a/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/index.js
 +++ b/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/index.js
-@@ -11323,7 +11323,7 @@ function renderNode(node, key, context) {
+@@ -11522,9 +11522,9 @@
+ 				title: mention.title,
  				"aria-label": mention.label,
  				onClick: mention.open,
  				children: [jsx(LinkIconMedium, {
@@ -11,11 +11,12 @@ index 2d94c1a..633f98f 100644
  					className: markdownCss.linkIcon
  				}), value]
  			}) }, key);
+ 			return jsx("code", { children: value }, key);
 diff --git a/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/types/markdown/render.d.ts b/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/types/markdown/render.d.ts
-index 6e59173..8adcc72 100644
 --- a/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/types/markdown/render.d.ts
 +++ b/node_modules/@deepseek-ai/dsh-client-ui-primitives/lib/types/markdown/render.d.ts
-@@ -85,6 +85,11 @@ export interface MarkdownFileMentions {
+@@ -84,8 +84,13 @@
+     resolve(value: string): {
          open: () => void;
          label: string;
          title: string;
@@ -27,3 +28,4 @@ index 6e59173..8adcc72 100644
      } | undefined;
  }
  /**
+  * One render pass's state: immutable options and targets plus the footnote

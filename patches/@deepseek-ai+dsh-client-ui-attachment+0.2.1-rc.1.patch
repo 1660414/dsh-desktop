@@ -1,8 +1,8 @@
 diff --git a/node_modules/@deepseek-ai/dsh-client-ui-attachment/lib/client.js b/node_modules/@deepseek-ai/dsh-client-ui-attachment/lib/client.js
-index 5f86649..62dfe16 100644
 --- a/node_modules/@deepseek-ai/dsh-client-ui-attachment/lib/client.js
 +++ b/node_modules/@deepseek-ai/dsh-client-ui-attachment/lib/client.js
-@@ -363,7 +363,7 @@ window.__ModuleLoader__.load({
+@@ -362,9 +362,9 @@
+ 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
  			const tag = document.createElement("style");
  			tag.dataset.plugin = "@deepseek-ai/dsh-client-ui-attachment";
  			tag.dataset.pluginCss = tagId$2;
@@ -11,7 +11,9 @@ index 5f86649..62dfe16 100644
  			document.head.appendChild(tag);
  		}
  		var FileCard_module_css_default = {
-@@ -376,6 +376,7 @@ window.__ModuleLoader__.load({
+ 			"body": "gSkjMW_body",
+@@ -375,8 +375,9 @@
+ 			"icon": "gSkjMW_icon",
  			"meta": "gSkjMW_meta",
  			"metaFailed": "gSkjMW_metaFailed",
  			"name": "gSkjMW_name",
@@ -19,7 +21,9 @@ index 5f86649..62dfe16 100644
  			"progressBar": "gSkjMW_progressBar",
  			"progressTrack": "gSkjMW_progressTrack",
  			"remove": "gSkjMW_remove",
-@@ -386,7 +387,7 @@ window.__ModuleLoader__.load({
+ 			"removeFailed": "gSkjMW_removeFailed",
+@@ -385,9 +386,9 @@
+ 		};
  		//#endregion
  		//#region lib/types/FileCard.js
  		/** One pending file card: type glyph, name, size or upload status, remove, retry. */
@@ -28,7 +32,9 @@ index 5f86649..62dfe16 100644
  			const extension = (0, _deepseek_ai_dsh_client_ui_primitives.fileExtension)(name).toUpperCase().slice(0, 8);
  			const meta = state === "uploading" ? labels.uploading : state === "error" ? labels.failed : [extension, (0, _deepseek_ai_dsh_client_ui_primitives.fileSizeText)(bytes)].filter((part) => part !== "").join(" ");
  			const retryable = state === "error";
-@@ -411,9 +412,11 @@ window.__ModuleLoader__.load({
+ 			return (0, react_jsx_runtime.jsxs)("div", {
+@@ -410,11 +411,13 @@
+ 						}), (0, react_jsx_runtime.jsx)("span", {
  							className: `${FileCard_module_css_default.meta} ${FileCard_module_css_default.metaFailed}`,
  							children: meta
  						})]
@@ -42,7 +48,9 @@ index 5f86649..62dfe16 100644
  						children: [(0, react_jsx_runtime.jsx)("span", {
  							className: FileCard_module_css_default.name,
  							children: name
-@@ -608,7 +611,7 @@ window.__ModuleLoader__.load({
+ 						}), (0, react_jsx_runtime.jsx)("span", {
+@@ -607,9 +610,9 @@
+ 		};
  		//#endregion
  		//#region lib/types/client/ComposerAttachments.js
  		/** Draft image previews, pending-file cards, drop target, and original-image preview. */
@@ -51,7 +59,9 @@ index 5f86649..62dfe16 100644
  			const [preview, setPreview] = (0, react.useState)(null);
  			const [dragActive, setDragActive] = (0, react.useState)(false);
  			const dragDepth = (0, react.useRef)(0);
-@@ -650,7 +653,10 @@ window.__ModuleLoader__.load({
+ 			const closePreview = (0, react.useCallback)(() => {
+@@ -649,9 +652,12 @@
+ 										onRemoveAttachment(attachment.id);
  									},
  									onRetry: () => {
  										onRetryFile(attachment.id);
@@ -63,3 +73,4 @@ index 5f86649..62dfe16 100644
  								});
  							}
  							return (0, react_jsx_runtime.jsxs)("div", {
+ 								className: ComposerAttachments_module_css_default.imageItem,

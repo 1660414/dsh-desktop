@@ -1,8 +1,8 @@
 diff --git a/node_modules/@deepseek-ai/dsh-llm-deepseek/lib/index.js b/node_modules/@deepseek-ai/dsh-llm-deepseek/lib/index.js
-index 4deb593..23656cc 100644
 --- a/node_modules/@deepseek-ai/dsh-llm-deepseek/lib/index.js
 +++ b/node_modules/@deepseek-ai/dsh-llm-deepseek/lib/index.js
-@@ -1742,8 +1742,9 @@ function providerError(raw, status, headers) {
+@@ -1759,10 +1759,11 @@
+ 	const message = typeof error.message === "string" ? error.message : `DeepSeek Messages request failed (${status ?? "stream error"})`;
  	const type = typeof error.type === "string" ? error.type : "";
  	const detail = `${type} ${typeof error.code === "string" ? error.code : ""} ${message}`;
  	let code;
@@ -14,3 +14,4 @@ index 4deb593..23656cc 100644
  	else if (status === 429 || type === "rate_limit_error") code = "RATE_LIMIT";
  	else if (isContextWindowExceededError(detail)) code = "CONTEXT_WINDOW_EXCEEDED";
  	else if (status === 400 || status === 413 || type === "invalid_request_error") code = "INVALID_REQUEST";
+ 	else if (status !== void 0 && status >= 500 || ["api_error", "overloaded_error"].includes(type)) code = "SERVER";

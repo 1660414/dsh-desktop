@@ -1,8 +1,8 @@
 diff --git a/node_modules/@deepseek-ai/dsh-client-ui-agent-preset/lib/client.js b/node_modules/@deepseek-ai/dsh-client-ui-agent-preset/lib/client.js
-index 242d8f4..6bc84c5 100644
 --- a/node_modules/@deepseek-ai/dsh-client-ui-agent-preset/lib/client.js
 +++ b/node_modules/@deepseek-ai/dsh-client-ui-agent-preset/lib/client.js
-@@ -271,6 +271,7 @@ window.__ModuleLoader__.load({
+@@ -904,8 +904,9 @@
+ 		//#region lib/types/client/locales.js
  		/** Locale bundles for the agent-preset hero chip, header label, and management section. */
  		/** English copy. */
  		const en = {
@@ -10,7 +10,9 @@ index 242d8f4..6bc84c5 100644
  			...guideEn,
  			builtInGroup: "Built-in",
  			customGroup: "Custom",
-@@ -297,6 +298,7 @@ window.__ModuleLoader__.load({
+ 			sectionIntro: "Choose the agent’s tools and how it works. Use Standard mode for everyday tasks, or Creator mode to add capabilities to DSH.",
+@@ -936,8 +937,9 @@
+ 			createPluginMissing: "Creator mode is not included in this configuration"
  		};
  		/** Simplified Chinese copy. */
  		const zh = {
@@ -18,10 +20,12 @@ index 242d8f4..6bc84c5 100644
  			...guideZh,
  			builtInGroup: "内置",
  			customGroup: "自定义",
-@@ -848,6 +850,85 @@ window.__ModuleLoader__.load({
+ 			sectionIntro: "选择 Agent 的工具和工作方式。日常任务用「标准模式」，扩展 DSH 的能力用「创造模式」。",
+@@ -1688,8 +1690,87 @@
  		*/
- 		function AgentPresetSection({ useAgentPresetSection, load, view, closeView, makeDefault, startCreatorDraft, close: closeSettings, t }) {
+ 		function AgentPresetSection({ useAgentPresetSection, load, view, closeView, makeDefault, startCreatorDraft, close: closeSettings, useDeveloperTools, t }) {
  			const state = useAgentPresetSection((value) => value);
+ 			const developerTools = useDeveloperTools((enabled) => enabled);
 +			const chinese = document.documentElement.lang?.toLowerCase().startsWith("zh");
 +			const copy = chinese ? {
 +				import: "导入", export: "导出预设", search: "搜索预设", awesome: "Awesome preset",
@@ -104,7 +108,9 @@ index 242d8f4..6bc84c5 100644
  			const [guide, setGuide] = (0, react.useState)(null);
  			const viewTrigger = (0, react.useRef)(null);
  			const closeViewOnUnmount = (0, react.useRef)(closeView);
-@@ -881,21 +962,53 @@ window.__ModuleLoader__.load({
+ 			(0, react.useEffect)(() => {
+@@ -1721,23 +1802,55 @@
+ 			});
  			return (0, react_jsx_runtime.jsxs)("section", {
  				className: AgentPresetSection_module_css_default.section,
  				children: [
@@ -157,13 +163,15 @@ index 242d8f4..6bc84c5 100644
  						children: state.error
  					}),
  					[true, false].map((builtIn) => {
--						const rows = state.rows.filter((row) => isBuiltInPreset(row) === builtIn);
+-						const rows = state.rows.filter((row) => isBuiltInPreset(row) === builtIn && (developerTools || !requiresCodingTools(row)));
 +						const query = search.trim().toLowerCase();
-+						const rows = state.rows.filter((row) => isBuiltInPreset(row) === builtIn && (query === "" || `${row.id} ${presetDisplayText(row, t).name} ${presetDisplayText(row, t).description ?? ""}`.toLowerCase().includes(query)));
++						const rows = state.rows.filter((row) => isBuiltInPreset(row) === builtIn && (developerTools || !requiresCodingTools(row)) && (query === "" || `${row.id} ${presetDisplayText(row, t).name} ${presetDisplayText(row, t).description ?? ""}`.toLowerCase().includes(query)));
  						const entry = builtIn ? null : creatorButton;
  						if (rows.length === 0 && entry === null) return null;
  						return (0, react_jsx_runtime.jsxs)("section", {
-@@ -1003,7 +1116,13 @@ window.__ModuleLoader__.load({
+ 							className: AgentPresetSection_module_css_default.group,
+@@ -1843,10 +1956,16 @@
+ 														viewTrigger.current = event.currentTarget;
  														view(row.id);
  													},
  													children: (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconBrowseOutlineRegular, {})
@@ -174,15 +182,17 @@ index 242d8f4..6bc84c5 100644
 +												title: copy.export,
 +												onClick: () => { void exportPreset(row.id); },
 +												children: copy.export
-+											})]
  											})]
++											})]
  										}, row.id);
  									})
-@@ -1020,6 +1139,34 @@ window.__ModuleLoader__.load({
+ 								}),
+ 								entry
+@@ -1861,8 +1980,36 @@
  							setGuide(null);
  						}
  					}),
-+					(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
+ 					(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
 +						open: importDraft !== null,
 +						onClose: () => { if (!importBusy) { setImportDraft(null); setImportFile(null); setTransferError(null); } },
 +						closeLabel: copy.cancel,
@@ -210,6 +220,8 @@ index 242d8f4..6bc84c5 100644
 +							]
 +						})
 +				}),
- 					(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
++					(0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.Modal, {
  						open: viewed !== null,
  						onClose: closeViewer,
+ 						closeLabel: t("close"),
+ 						onKeyDownCapture: (event) => {
