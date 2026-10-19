@@ -135,12 +135,13 @@ print('signed test build behavior passed')
 
   it('lists features and descriptions since the nearest reachable tag using real git history', () => {
     const output = execFileSync('python3', ['-c', String.raw`
-import os, sys, tempfile, subprocess
+import contextlib, os, sys, tempfile, subprocess
 from pathlib import Path
 sys.path.insert(0, str(Path('.github/scripts').resolve()))
 import signed_test_build as build
-with tempfile.TemporaryDirectory() as work:
-    os.chdir(work)
+original_directory = Path.cwd()
+# Restore cwd before TemporaryDirectory cleanup: Windows locks the current directory.
+with tempfile.TemporaryDirectory() as work, contextlib.chdir(work):
     os.environ.update(GIT_AUTHOR_NAME='Test', GIT_COMMITTER_NAME='Test', GIT_AUTHOR_EMAIL='test@example.com', GIT_COMMITTER_EMAIL='test@example.com')
     def git(*args):
         return subprocess.check_output(['git', *args], text=True).strip()
@@ -172,6 +173,8 @@ with tempfile.TemporaryDirectory() as work:
     git('tag', '-d', 'v1.0.0', 'V1.1.0', 'v9.0.0')
     notes = build.build_test_changes('https://github.com/example/desktop')
     assert '无历史版本 tag' in notes and 'Historical feature' in notes
+assert Path.cwd() == original_directory
+assert not Path(work).exists()
 print('tag range behavior passed')
 `], { encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } })
     expect(output).toContain('tag range behavior passed')
