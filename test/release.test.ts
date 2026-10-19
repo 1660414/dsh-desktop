@@ -13,7 +13,7 @@ const releaseAssets = [
 ]
 
 /** The exact Harness build every `@deepseek-ai/dsh-*` production dep is pinned to. */
-const HARNESS_VERSION = '0.2.1-rc.1'
+const HARNESS_VERSION = '0.2.1-rc.2'
 
 describe('GitHub release contract', () => {
   it('keeps the package and lockfile versions aligned', async () => {
@@ -101,13 +101,20 @@ describe('GitHub release contract', () => {
     expect(packageLockRaw).not.toMatch(/file:packages\/harness-/)
   })
 
-  it('does not promote optional Harness providers and test support into the desktop runtime', async () => {
+  it('keeps the official Harness closure at one version without promoting optional providers or test support', async () => {
     const packageJson = JSON.parse(
       await readFile(path.join(projectRoot, 'package.json'), 'utf8')
     ) as { dependencies: Record<string, string> }
     const packageLock = JSON.parse(
       await readFile(path.join(projectRoot, 'package-lock.json'), 'utf8')
-    ) as { packages: Record<string, unknown> }
+    ) as { packages: Record<string, { version?: string }> }
+
+    for (const [location, metadata] of Object.entries(packageLock.packages)) {
+      const name = location.slice(location.lastIndexOf('node_modules/') + 'node_modules/'.length)
+      if (/^@deepseek-ai\/dsh(?:-|$)/.test(name)) {
+        expect(metadata.version, location).toBe(HARNESS_VERSION)
+      }
+    }
 
     const excludedHarnessPackages = [
       '@deepseek-ai/cordis-plugin-logger-console',
@@ -144,8 +151,14 @@ describe('GitHub release contract', () => {
       expect(packageJson.dependencies[packageName]).toBeUndefined()
       expect(packageLock.packages[`node_modules/${packageName}`]).toBeUndefined()
     }
-    // 0.2.1 official terminal, session-search and session-title bundles own these.
-    for (const packageName of ['@deepseek-ai/dsh-tool-terminal', '@deepseek-ai/dsh-tool-session-query', '@deepseek-ai/dsh-session-title-all-prompts-llm']) {
+    // Official bundles own these, including the rc.2 retrieval API and model badge.
+    for (const packageName of [
+      '@deepseek-ai/dsh-tool-terminal',
+      '@deepseek-ai/dsh-tool-session-query',
+      '@deepseek-ai/dsh-session-title-all-prompts-llm',
+      '@deepseek-ai/dsh-web-deepseek-api',
+      '@deepseek-ai/dsh-client-ui-deepseek-model-label-1017'
+    ]) {
       expect(packageJson.dependencies[packageName]).toBeUndefined()
       expect(packageLock.packages[`node_modules/${packageName}`]).toBeDefined()
     }

@@ -78,6 +78,14 @@ function Get-HarnessLogPaths {
 
 function Assert-OfficeRuntime([string]$executable) {
   $resources = Join-Path (Split-Path $executable) 'resources'
+  $previousRunAsNode = $env:ELECTRON_RUN_AS_NODE
+  try {
+    $env:ELECTRON_RUN_AS_NODE = '1'
+    & $executable (Join-Path $PSScriptRoot 'verify-packaged-harness.cjs') '--verify-runtime' (Join-Path $resources 'app.asar') $resources $executable
+    if ($LASTEXITCODE -ne 0) { throw 'Installed Harness and native runtime validation failed.' }
+  } finally {
+    $env:ELECTRON_RUN_AS_NODE = $previousRunAsNode
+  }
   & node (Join-Path $PSScriptRoot 'verify-office-runtime.cjs') $resources $executable
   if ($LASTEXITCODE -ne 0) { throw 'Installed Office runtime validation failed.' }
 }

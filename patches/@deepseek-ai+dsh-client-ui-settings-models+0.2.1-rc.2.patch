@@ -1,8 +1,8 @@
 diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js b/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js
+index 2ca65cc..ad7714f 100644
 --- a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js
 +++ b/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.js
-@@ -63,8 +63,40 @@
- 			tag.dataset.pluginCss = tagId$3;
+@@ -64,6 +64,38 @@ window.__ModuleLoader__.load({
  			tag.textContent = css$3;
  			document.head.appendChild(tag);
  		}
@@ -41,9 +41,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  		var ModelsSection_module_css_default = {
  			"accountStatus": "zGbnIq_accountStatus",
  			"addActions": "zGbnIq_addActions",
- 			"addBlock": "zGbnIq_addBlock",
-@@ -476,8 +508,70 @@
- 				] })]
+@@ -477,6 +509,68 @@ window.__ModuleLoader__.load({
  			});
  		}
  		//#endregion
@@ -112,9 +110,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  		//#region lib/types/client/ModelRow.js
  		/**
  		* Render consistent model identity, capacity, and input-type controls.
- 		* @param props - drafted fields and their owning editor's actions.
-@@ -565,8 +659,89 @@
- 				}) : null]
+@@ -566,6 +660,87 @@ window.__ModuleLoader__.load({
  			});
  		}
  		//#endregion
@@ -202,9 +198,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  		//#region lib/types/client/DeepSeekModelsEditor.js
  		/**
  		* Curated editor for the direct DeepSeek adapter's advisory model catalog.
- 		* The settings layer replaces `models` as one array, so the parent supplies
-@@ -666,8 +841,9 @@
- 		*/
+@@ -667,12 +842,17 @@ window.__ModuleLoader__.load({
  		function DeepSeekModelsEditor(props) {
  			const [editing, setEditing] = (0, react.useState)(() => /* @__PURE__ */ new Map());
  			const [expanded, setExpanded] = (0, react.useState)(() => /* @__PURE__ */ new Set());
@@ -213,8 +207,16 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  				const next = props.models.map((model, at) => {
  					const copy = { ...model };
  					if (at !== index) return copy;
-@@ -738,8 +914,29 @@
- 				onBlur: () => {
+ 					if (value === void 0) Reflect.deleteProperty(copy, key);
+ 					else copy[key] = value;
++					if (key === "inputModalities" && Array.isArray(value) && !value.includes("image")) {
++						Reflect.deleteProperty(copy, "imagePixelBudget");
++						Reflect.deleteProperty(copy, "imageMaxBytes");
++					}
+ 					return copy;
+ 				});
+ 				props.onChange(next);
+@@ -739,6 +919,27 @@ window.__ModuleLoader__.load({
  					settleCapacity(index, field);
  				}
  			});
@@ -242,9 +244,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			return (0, react_jsx_runtime.jsxs)("section", {
  				className: ModelsSection_module_css_default["modelCatalog"],
  				"aria-label": props.t("models"),
- 				children: [
-@@ -761,48 +958,91 @@
- 							onClick: reset,
+@@ -762,46 +963,89 @@ window.__ModuleLoader__.load({
  							children: props.t("resetModels")
  						}) : null]
  					}),
@@ -367,9 +367,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  					})
  				]
  			});
- 		}
-@@ -907,8 +1147,9 @@
- 			const [picked, setPicked] = (0, react.useState)(/* @__PURE__ */ new Set());
+@@ -908,6 +1152,7 @@ window.__ModuleLoader__.load({
  			const [candidateQuery, setCandidateQuery] = (0, react.useState)("");
  			const [expanded, setExpanded] = (0, react.useState)(/* @__PURE__ */ new Set());
  			const [editing, setEditing] = (0, react.useState)(/* @__PURE__ */ new Map());
@@ -377,9 +375,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			/** Buffer key for one capacity field; the row half moves when rows do. */
  			const bufferKey = (index, field) => `${String(index)}:${field}`;
  			const editCapacity = (index, field, text) => {
- 				setEditing((current) => new Map(current).set(bufferKey(index, field), text));
-@@ -1045,68 +1286,135 @@
- 								children: busy ? t("fetching") : t("fetchModels")
+@@ -1046,66 +1291,133 @@ window.__ModuleLoader__.load({
  							})
  						]
  					}),
@@ -566,9 +562,21 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  					failure !== void 0 ? (0, react_jsx_runtime.jsx)("p", {
  						className: ModelsSection_module_css_default["error"],
  						children: failure
- 					}) : null,
-@@ -1563,8 +1871,9 @@
- 			const [baseURL, setBaseURL] = (0, react.useState)("");
+@@ -1542,10 +1854,10 @@ window.__ModuleLoader__.load({
+ 		* credential seam with a raw regular expression the user cannot act on.
+ 		*/
+ 		const ROUTE_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+-		function isHttpUrl(value) {
++		function isHttpUrl(value, deepseek = false) {
+ 			try {
+-				const protocol = new URL(value).protocol;
+-				return protocol === "http:" || protocol === "https:";
++				const url = new URL(value);
++				return value.trim() === value && (url.protocol === "http:" || url.protocol === "https:") && !url.username && !url.password && (!deepseek || !url.search && !url.hash);
+ 			} catch {
+ 				return false;
+ 			}
+@@ -1564,6 +1876,7 @@ window.__ModuleLoader__.load({
  			const [protocol, setProtocol] = (0, react.useState)(protocols[0] ?? "");
  			const [keyDraft, setKeyDraft] = (0, react.useState)("");
  			const [models, setModels] = (0, react.useState)([]);
@@ -576,9 +584,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			const [busy, setBusy] = (0, react.useState)(false);
  			const [listBusy, setListBusy] = (0, react.useState)(false);
  			(0, react.useEffect)(() => {
- 				onBusyChange?.(busy || listBusy);
-@@ -1630,8 +1939,13 @@
- 				} finally {
+@@ -1631,6 +1944,11 @@ window.__ModuleLoader__.load({
  					setBusy(false);
  				}
  			};
@@ -590,9 +596,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			return (0, react_jsx_runtime.jsxs)("div", {
  				className: ModelsSection_module_css_default["editor"],
  				children: [
- 					(0, react_jsx_runtime.jsxs)("div", {
-@@ -1742,8 +2056,10 @@
- 					(0, react_jsx_runtime.jsx)(ModelListEditor, {
+@@ -1743,6 +2061,8 @@ window.__ModuleLoader__.load({
  						models,
  						onChange: setModels,
  						reasoningLevels,
@@ -601,9 +605,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  						probe: {
  							settingsNs: NS$1,
  							baseURL: normalizedBaseURL,
- 							api: protocol,
-@@ -1762,20 +2078,29 @@
- 					hint === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
+@@ -1763,18 +2083,27 @@ window.__ModuleLoader__.load({
  						className: ModelsSection_module_css_default["advancedHint"],
  						children: hint
  					}),
@@ -643,9 +645,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  					})
  				]
  			});
- 		}
-@@ -1867,8 +2192,10 @@
- 				listBusy,
+@@ -1868,6 +2197,8 @@ window.__ModuleLoader__.load({
  				onBusyChange
  			]);
  			const [failure, setFailure] = (0, react.useState)(void 0);
@@ -654,9 +654,23 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			const [committedOriginal, setCommittedOriginal] = (0, react.useState)(() => schema.getPath(namespace.user, settingsPath));
  			const [expectedRevision, setExpectedRevision] = (0, react.useState)(() => namespace.revision);
  			const root = (0, react.useMemo)(() => schema.rehydrate(namespace.schema), [namespace.schema, schema]);
- 			const node = (0, react.useMemo)(() => schema.nodeAtPath(root, settingsPath), [
-@@ -1983,8 +2310,17 @@
+@@ -1907,6 +2238,7 @@ window.__ModuleLoader__.load({
+ 			const shownKeyFailure = (props.credentialRequired === true && keyDraft.length > 0 && keyValue.length === 0 ? "keyRequired" : void 0) ?? keyFailure;
+ 			const probeApi = stringAt(draft, "api") ?? stringAt(fallback, "api");
+ 			const probeBaseURL = stringAt(draft, "baseURL") ?? stringAt(fallback, "baseURL");
++			const endpointInvalid = props.credentialOnly !== true && probeBaseURL !== void 0 && !isHttpUrl(probeBaseURL, namespace.ns === "llm-deepseek");
+ 			const probe = {
+ 				settingsNs: namespace.ns,
+ 				provider: props.provider,
+@@ -1921,6 +2253,7 @@ window.__ModuleLoader__.load({
+ 			* outside the card. Ops name only the fields this card can see.
  			*/
+ 			const applyOnce = async () => {
++				if (endpointInvalid) return t("customBaseUrlInvalid");
+ 				const ns = namespace.ns;
+ 				const next = layout === "pi-ai" && stringAt(draft, "apiKeyEnv") === void 0 && stringAt(fallback, "apiKeyEnv") === void 0 && keyValue.length > 0 ? schema.setPath(draft, ["apiKeyEnv"], keyRef) : draft;
+ 				if (props.credentialOnly !== true) {
+@@ -1984,6 +2317,15 @@ window.__ModuleLoader__.load({
  			const inheritedModels = () => {
  				return schema.getPath(namespace.base, [...settingsPath, "models"]) ?? schema.nodeAtPath(root, [...settingsPath, "models"])?.meta.default;
  			};
@@ -672,9 +686,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			/**
  			* The curated fields of one known adapter family. The family arrives
  			* narrowed so the per-family branches below are total: an unknown namespace
- 			* renders the hint instead and never reaches this body.
-@@ -2032,8 +2368,10 @@
- 				/** What both family editors take: the rows, whose layer owns them, and the two writes. */
+@@ -2033,6 +2375,8 @@ window.__ModuleLoader__.load({
  				const catalogProps = {
  					models,
  					overridden: modelsOverridden,
@@ -683,9 +695,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  					t,
  					disabled,
  					onChange: (next) => {
- 						setDraft((current) => schema.setPath(current, ["models"], next));
-@@ -2074,8 +2412,12 @@
- 						})
+@@ -2075,6 +2419,10 @@ window.__ModuleLoader__.load({
  					]
  				}), props.credentialOnly === true ? null : (0, react_jsx_runtime.jsxs)("details", {
  					className: ModelsSection_module_css_default["customized"],
@@ -696,16 +706,23 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  					children: [(0, react_jsx_runtime.jsx)("summary", {
  						className: ModelsSection_module_css_default["customizedSummary"],
  						children: t("customized")
- 					}), (0, react_jsx_runtime.jsxs)("div", {
-@@ -2163,10 +2505,25 @@
- 						]
+@@ -2114,7 +2462,7 @@ window.__ModuleLoader__.load({
+ 										"aria-label": t("baseUrl"),
+ 										disabled,
+ 										onChange: (event) => {
+-											setField("baseURL", event.target.value === "" ? void 0 : event.target.value);
++										setField("baseURL", event.target.value === "" ? void 0 : event.target.value.trim());
+ 										}
+ 									}),
+ 									endpointHint === void 0 ? null : (0, react_jsx_runtime.jsx)("span", {
+@@ -2164,8 +2512,23 @@ window.__ModuleLoader__.load({
  					})]
  				})] });
  			};
 +			const footerProps = {
 +				t,
 +				busy,
-+				submitDisabled: disabled || layout === "unknown" || props.credentialOnly !== true && modelFailure !== void 0 || shownKeyFailure !== void 0 || props.credentialRequired === true && keyValue.length === 0,
++				submitDisabled: disabled || endpointInvalid || layout === "unknown" || props.credentialOnly !== true && modelFailure !== void 0 || shownKeyFailure !== void 0 || props.credentialRequired === true && keyValue.length === 0,
 +				submitLabelKey: props.submitLabelKey ?? "apply",
 +				submitBusyLabelKey: props.submitBusyLabelKey ?? "applying",
 +				...props.cancelLabelKey === void 0 ? {} : { cancelLabelKey: props.cancelLabelKey },
@@ -723,8 +740,11 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  				children: [
  					props.hideTitle === true ? null : (0, react_jsx_runtime.jsxs)("div", {
  						className: ModelsSection_module_css_default["editorHeader"],
- 						children: [(0, react_jsx_runtime.jsx)("span", {
-@@ -2188,22 +2545,17 @@
+@@ -2185,24 +2548,20 @@ window.__ModuleLoader__.load({
+ 						className: ModelsSection_module_css_default["error"],
+ 						children: failure
+ 					}) : null,
++					endpointInvalid ? (0, react_jsx_runtime.jsx)("p", { role: "alert", children: t("customBaseUrlInvalid") }) : null,
  					props.credentialOnly === true || modelFailure === void 0 ? null : (0, react_jsx_runtime.jsx)("p", {
  						className: ModelsSection_module_css_default["advancedHint"],
  						children: `${t("model")} ${String(modelFailure.index + 1)}: ${t(modelFailure.key)}`
@@ -755,9 +775,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  					})
  				]
  			});
- 		}
-@@ -2315,8 +2667,28 @@
- 		/** Replace the one provider placeholder in localized destructive-action copy. */
+@@ -2316,6 +2675,26 @@ window.__ModuleLoader__.load({
  		function providerCopy(template, target) {
  			return template.replace("{provider}", () => providerTargetLabel(target));
  		}
@@ -784,9 +802,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  		/**
  		* Render the Models section content column.
  		* @param props - slot-delivered injected dependencies.
- 		* @returns the section, or null while the shell has not injected yet.
-@@ -2365,8 +2737,9 @@
- 			const [deleteTarget, setDeleteTarget] = (0, react.useState)(void 0);
+@@ -2366,6 +2745,7 @@ window.__ModuleLoader__.load({
  			const [deleting, setDeleting] = (0, react.useState)(false);
  			const [deleteFailure, setDeleteFailure] = (0, react.useState)(void 0);
  			const [savedTarget, setSavedTarget] = (0, react.useState)(void 0);
@@ -794,9 +810,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			const [dismissedSetup, setDismissedSetup] = (0, react.useState)(() => /* @__PURE__ */ new Set());
  			const announceSaved = (target) => {
  				controller.load().then(() => {
- 					setSavedTarget(target);
-@@ -2462,8 +2835,12 @@
- 				return namespace === void 0 || row.configured ? [] : [{
+@@ -2463,6 +2843,10 @@ window.__ModuleLoader__.load({
  					row,
  					namespace
  				}];
@@ -807,9 +821,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			});
  			const piAi = state.namespaces.get("llm-pi-ai");
  			const protocols = protocolChoices(piAi, schema);
- 			const reasoningLevels = reasoningLevelChoices(piAi, schema);
-@@ -2884,19 +3261,44 @@
- 		/* v8 ignore next 3 -- closed-union defaults only defend future source widening */
+@@ -2885,9 +3269,24 @@ window.__ModuleLoader__.load({
  		function assertNever$1(_value) {
  			throw new Error("unexpected DeepSeek onboarding state");
  		}
@@ -836,8 +848,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  		* @param props - settings-shell owner state and Models feature dependencies.
  		* @returns the onboarding modal or null when onboarding needs no intervention.
  		*/
- 		function DeepSeekOnboardingDialog(props) {
- 			const { complete, controller, useModels, operations, schema, t, renderSlot, automatic, explicit = false } = props;
+@@ -2896,6 +3295,16 @@ window.__ModuleLoader__.load({
  			const [apiKey, setApiKey] = (0, react.useState)(explicit);
  			const state = useModels((snapshot) => snapshot);
  			const readiness = onboardingReadiness(state);
@@ -854,9 +865,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			(0, react.useEffect)(() => {
  				if ((automatic || explicit) && state.status === "idle") controller.load();
  			}, [
- 				controller,
-@@ -3247,8 +3649,10 @@
- 			addCustomHint: "Connect a relay, a self-hosted server, or any other OpenAI- or Anthropic-compatible endpoint by its base URL, protocol, and models.",
+@@ -3248,6 +3657,8 @@ window.__ModuleLoader__.load({
  			addCatalogExhausted: "Every catalog provider is already configured.",
  			addCustomUnavailable: "No API protocol is available to declare.",
  			provider: "Provider",
@@ -865,9 +874,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			close: "Close",
  			cancel: "Cancel",
  			apply: "Apply",
- 			applying: "Applying…",
-@@ -3305,8 +3709,16 @@
- 			modelReasoningValueRequired: "Every level besides Off needs an API value, and no value can be empty.",
+@@ -3306,6 +3717,14 @@ window.__ModuleLoader__.load({
  			modelReasoningAdd: "Add level",
  			modelReasoningRemove: "Delete level",
  			modelReasoningOffValuePlaceholder: "Turns reasoning off",
@@ -882,9 +889,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			addModel: "Add model",
  			removeModel: "Delete model",
  			modelsEmpty: "No models will be shown in the selector. Unlisted IDs can still be sent directly.",
- 			keyBlank: "Enter the API key, or leave the field empty to keep the stored one.",
-@@ -3353,12 +3765,16 @@
- 			welcomeTitle: "Preview Notice",
+@@ -3354,10 +3773,14 @@ window.__ModuleLoader__.load({
  			welcomeBody: "DeepSeek Harness 0.2 is still in preview, and many areas need continued improvement and refinement. We welcome feedback and suggestions from all developers and users. The new desktop app now targets a broad range of users, while developer-related advanced features can be enabled in the settings. DeepSeek Harness’s product features and plugin APIs are expected to continue rapid iteration and evolution, and will gradually stabilize over time.\n\nWe look forward to exploring the limits of intelligence together with users and developers around the world, building on open-source, reusable, and composable infrastructure. We welcome everyone to bring their ideas to life with DeepSeek Harness and participate in the community to enrich the plugin ecosystem.",
  			welcomeContinue: "Continue",
  			welcomeError: "The acknowledgement could not be saved. Please try again.",
@@ -902,9 +907,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			onboardingSaving: "Saving…",
  			keyRequired: "Enter an API key to continue."
  		};
- 		/** Chinese strings (same keys as {@link en}). */
-@@ -3442,8 +3858,16 @@
- 			modelReasoningValueRequired: "Off 以外的档位都需要填写 API 参数值，且参数值不能为空字符串。",
+@@ -3443,6 +3866,14 @@ window.__ModuleLoader__.load({
  			modelReasoningAdd: "添加档位",
  			modelReasoningRemove: "删除档位",
  			modelReasoningOffValuePlaceholder: "关闭思考",
@@ -919,9 +922,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			addModel: "添加模型",
  			removeModel: "删除模型",
  			modelsEmpty: "模型选择器中将不显示任何模型；目录外 ID 仍可直接发送。",
- 			keyBlank: "请输入 API 密钥；留空则保持已存储的密钥。",
-@@ -3490,12 +3914,16 @@
- 			welcomeTitle: "预览版说明",
+@@ -3491,10 +3922,14 @@ window.__ModuleLoader__.load({
  			welcomeBody: "DeepSeek Harness 目前的 0.2 版本仍处于预览阶段，还有许多地方需要持续改进和打磨，希望听取广大开发者和用户的反馈建议。现在，新的桌面端面向广泛用户，开发者相关的进阶功能可在配置中开启使用。预计 DeepSeek Harness 的产品功能以及插件 API 都会继续快速迭代、持续演化，并逐渐趋于稳定。\n\n我们期待与全球用户和开发者一起，在开源、可复用、可组合的基础设施之上，共同探索智能上限。欢迎大家用 DeepSeek Harness 将想法变成现实，与社区一起丰富插件生态。",
  			welcomeContinue: "继续",
  			welcomeError: "暂时无法保存确认状态，请重试。",
@@ -939,9 +940,7 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  			onboardingSaving: "保存中…",
  			keyRequired: "请输入 API 密钥后继续。"
  		};
- 		//#endregion
-@@ -4498,24 +4926,9 @@
- 						scope: "root"
+@@ -4499,22 +4934,7 @@ window.__ModuleLoader__.load({
  					}
  				}
  			}, ModelsSection));
@@ -965,4 +964,3 @@ diff --git a/node_modules/@deepseek-ai/dsh-client-ui-settings-models/lib/client.
  		}
  		//#endregion
  		exports.apply = apply;
- 		exports.inject = inject;
