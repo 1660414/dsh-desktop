@@ -498,7 +498,7 @@
       ]
     },
     "dmg": {
-      "format": "UDBZ"
+      "format": "UDZO"
     },
     "win": {
       "icon": "build/icon.ico",
