@@ -127,10 +127,10 @@ print('signed test build behavior passed')
     const yaml = require('js-yaml') as { load(source: string): { jobs: Record<string, { needs: string[]; if: string }> } }
     const workflow = yaml.load(readFileSync('.github/workflows/release.yml', 'utf8'))
     const job = workflow.jobs['publish-signed-test']
-    expect(job?.needs).toEqual(['macos', 'sign-windows', 'smoke-signed-windows'])
+    expect(job?.needs).toEqual(['macos', 'sign-windows'])
     expect(job?.if).toContain("inputs.mode == 'signed'")
     expect(job?.if).toContain("inputs.target == 'windows' || needs.macos.result == 'success'")
-    expect(job?.if).toContain("needs.smoke-signed-windows.result == 'success'")
+    expect(job?.if).toContain("inputs.target == 'macos' || needs.sign-windows.result == 'success'")
   })
 
   it('lists features and descriptions since the nearest reachable tag using real git history', () => {
