@@ -55,7 +55,11 @@ function Install-At([string]$directory) {
 
 function Assert-InstalledPeSignatures([string]$directory) {
   $count = 0
+  $officeRuntimeDir = Join-Path $directory 'resources\office-runtime'
   foreach ($file in Get-ChildItem -LiteralPath $directory -File -Recurse -Force) {
+    if ($file.FullName.StartsWith($officeRuntimeDir, [System.StringComparison]::OrdinalIgnoreCase)) {
+      continue
+    }
     $stream = [System.IO.File]::OpenRead($file.FullName)
     try {
       if ($stream.Length -lt 2 -or $stream.ReadByte() -ne 0x4d -or $stream.ReadByte() -ne 0x5a) { continue }

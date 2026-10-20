@@ -39,7 +39,7 @@ it('recovers saved configuration and an old preset before booting a real Harness
     dshEntryPath: resolve('node_modules/@deepseek-ai/dsh/lib/bin.js'),
     nodeEntryPath: resolve('build/harness-node-entry.mjs'), nodeExecutablePath: resolveTestNodeExecutable(),
     dshPatchPath: resolve('build/dsh-desktop-safe.patch.yml'), dshSafePatchPath: resolve('build/dsh-desktop-safe.patch.yml'),
-    dshHome: home, logPath: join(home, 'runtime.log'), startupTimeoutMs: 30_000,
+    dshHome: home, logPath: join(home, 'runtime.log'), startupTimeoutMs: 30_000, preferredPort: 0,
     launchProcess: (executable, args, options) => spawn(executable, args, options), onChanged() {}
   })
   const backups: string[] = []
