@@ -715,18 +715,28 @@ jobs:
           installer_count="$(find "$WINDOWS_SIGNING_WORK_DIR/release" -maxdepth 1 -type f -name '*.exe' | wc -l | tr -d ' ')"
           test "$installer_count" = '1'
           installer="$(find "$WINDOWS_SIGNING_WORK_DIR/release" -maxdepth 1 -type f -name '*.exe' -print -quit)"
-          java -jar "$JSIGN_JAR" \
-            --storetype ETOKEN \
-            --storepass "file:$pin_file" \
-            --alg SHA-256 \
-            --tsaurl http://timestamp.digicert.com \
-            --tsmode RFC3161 \
-            --tsretries 3 \
-            --tsretrywait 10 \
-            --name 'DSH Desktop' \
-            --url https://www.dshdesktop.com \
-            --verbose \
-            "$installer"
+          for attempt in 1 2 3; do
+            if java -jar "$JSIGN_JAR" \
+              --storetype ETOKEN \
+              --storepass "file:$pin_file" \
+              --alg SHA-256 \
+              --tsaurl http://timestamp.digicert.com \
+              --tsmode RFC3161 \
+              --tsretries 3 \
+              --tsretrywait 10 \
+              --name 'DSH Desktop' \
+              --url https://www.dshdesktop.com \
+              --verbose \
+              "$installer"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::Signing final installer failed after 3 attempts"
+              exit 1
+            fi
+            echo "Signing final installer failed, retrying in $((attempt * 3))s (attempt $attempt/3)..."
+            sleep $((attempt * 3))
+          done
           java -jar "$JSIGN_JAR" extract --format DER "$installer"
           test -s "$installer.sig"
           rm -f "$installer.sig"
