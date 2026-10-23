@@ -498,7 +498,22 @@
       ]
     },
     "dmg": {
-      "format": "UDZO"
+      "format": "UDZO",
+      "background": ".build/dmg/background.tiff",
+      "iconSize": 85,
+      "contents": [
+        {
+          "x": 154,
+          "y": 150,
+          "type": "file"
+        },
+        {
+          "x": 386,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "win": {
       "icon": "build/icon.ico",
@@ -527,6 +542,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     },
+    "beforePack": "scripts/prepare-dmg-background.cjs",
     "afterPack": "scripts/after-pack.cjs",
     "afterSign": "scripts/notarize-macos.mjs"
   }
